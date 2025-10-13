@@ -1,0 +1,31 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Allure
+allure-report/
+allure-results/
+
+# Браузер драйверы (кроме yandexdriver.exe который нам нужен)
+*.exe
+!yandexdriver.exe
+
+# Временные файлы
+*.tmp
+*.temp
