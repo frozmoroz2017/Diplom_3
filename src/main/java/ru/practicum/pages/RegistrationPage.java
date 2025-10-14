@@ -6,6 +6,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import ru.practicum.utils.EnvConfig;
+import io.qameta.allure.Step;
 
 public class RegistrationPage {
     private final WebDriver driver;
@@ -21,30 +22,37 @@ public class RegistrationPage {
         this.driver = driver;
     }
 
+    @Step("Открытие страницы регистрации")
     public void open() {
         driver.get(EnvConfig.BASE_URL + "/register");
     }
 
+    @Step("Ввод имени: {name}")
     public void setName(String name) {
         driver.findElement(nameField).sendKeys(name);
     }
 
+    @Step("Ввод email: {email}")
     public void setEmail(String email) {
         driver.findElement(emailField).sendKeys(email);
     }
 
+    @Step("Ввод пароля")
     public void setPassword(String password) {
         driver.findElement(passwordField).sendKeys(password);
     }
 
+    @Step("Клик по кнопке 'Зарегистрироваться'")
     public void clickRegisterButton() {
         driver.findElement(registerButton).click();
     }
 
+    @Step("Клик по ссылке 'Войти'")
     public void clickLoginLink() {
         driver.findElement(loginLink).click();
     }
 
+    @Step("Регистрация пользователя: {name}")
     public void register(String name, String email, String password) {
         setName(name);
         setEmail(email);
@@ -52,14 +60,21 @@ public class RegistrationPage {
         clickRegisterButton();
     }
 
+    @Step("Получение сообщения об ошибке")
     public String getErrorMessage() {
         new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(errorMessage));
         return driver.findElement(errorMessage).getText();
     }
 
+    @Step("Ожидание загрузки страницы регистрации")
     public void waitForPageLoad() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOfElementLocated(registerButton));
+    }
+
+    @Step("Проверка, что страница регистрации загружена")
+    public boolean isPageLoaded() {
+        return driver.findElements(registerButton).size() > 0;
     }
 }

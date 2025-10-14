@@ -1,8 +1,6 @@
 package ru.practicum;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,9 +9,10 @@ import ru.practicum.pages.LoginPage;
 import ru.practicum.pages.MainPage;
 import ru.practicum.pages.RegistrationPage;
 import ru.practicum.pages.PasswordRecoveryPage;
+import ru.practicum.api.UserAPI;
 import io.qameta.allure.junit4.DisplayName;
 import io.qameta.allure.Step;
-import java.time.Duration;
+import io.restassured.response.Response;
 
 import static org.junit.Assert.assertTrue;
 
@@ -24,6 +23,7 @@ public class LoginTest {
     private RegistrationPage registrationPage;
     private PasswordRecoveryPage passwordRecoveryPage;
     private User testUser;
+    private String accessToken;
 
     @Before
     public void setUp() {
@@ -34,19 +34,16 @@ public class LoginTest {
         registrationPage = new RegistrationPage(driver);
         passwordRecoveryPage = new PasswordRecoveryPage(driver);
 
-        // Создаем тестового пользователя и регистрируем его
+
         testUser = User.createRandomUser();
-        registerTestUser(testUser);
+        registerTestUserViaAPI(testUser);
     }
 
-    @Step("Регистрация тестового пользователя: {user.name}")
-    private void registerTestUser(User user) {
-        registrationPage.open();
-        registrationPage.waitForPageLoad();
-        registrationPage.register(user.getName(), user.getEmail(), user.getPassword());
-
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.urlContains("/login"));
+    @Step("Регистрация тестового пользователя через API: {user.name}")
+    private void registerTestUserViaAPI(User user) {
+        Response response = UserAPI.createUser(user);
+        Response loginResponse = UserAPI.loginUser(user);
+        accessToken = UserAPI.getAccessToken(loginResponse);
     }
 
     @Step("Выполнение входа со страницы")
@@ -55,9 +52,7 @@ public class LoginTest {
         loginPage.waitForPageLoad();
         loginPage.login(testUser.getEmail(), testUser.getPassword());
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfElementLocated(mainPage.getOrderButtonLocator()));
-
+        mainPage.waitForOrderButton();
         assertTrue("Кнопка 'Оформить заказ' должна отображаться после успешного входа",
                 mainPage.isOrderButtonDisplayed());
     }
@@ -104,6 +99,11 @@ public class LoginTest {
 
     @After
     public void tearDown() {
+
+        if (accessToken != null) {
+            UserAPI.deleteUser(accessToken);
+        }
+
         if (driver != null) {
             driver.quit();
         }

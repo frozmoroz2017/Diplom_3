@@ -6,6 +6,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import ru.practicum.utils.EnvConfig;
+import io.qameta.allure.Step;
 
 public class PasswordRecoveryPage {
     private final WebDriver driver;
@@ -16,14 +17,17 @@ public class PasswordRecoveryPage {
         this.driver = driver;
     }
 
+    @Step("Открытие страницы восстановления пароля")
     public void open() {
         driver.get(EnvConfig.BASE_URL + "/forgot-password");
     }
 
+    @Step("Клик по ссылке 'Войти'")
     public void clickLoginLink() {
         driver.findElement(loginLink).click();
     }
 
+    @Step("Ожидание загрузки страницы восстановления пароля")
     public void waitForPageLoad() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOfElementLocated(loginLink));
