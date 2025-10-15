@@ -23,7 +23,6 @@ public class LoginTest {
     private RegistrationPage registrationPage;
     private PasswordRecoveryPage passwordRecoveryPage;
     private User testUser;
-    private String accessToken;
 
     @Before
     public void setUp() {
@@ -34,16 +33,39 @@ public class LoginTest {
         registrationPage = new RegistrationPage(driver);
         passwordRecoveryPage = new PasswordRecoveryPage(driver);
 
-
         testUser = User.createRandomUser();
         registerTestUserViaAPI(testUser);
     }
 
+    @After
+    @Step("Удаление тестового пользователя")
+    public void tearDown() {
+
+        if (testUser != null) {
+            String accessToken = getAccessTokenForDeletion(testUser);
+            if (accessToken != null) {
+                UserAPI.deleteUser(accessToken);
+            }
+        }
+
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Step("Получение access token для удаления пользователя")
+    private String getAccessTokenForDeletion(User user) {
+        try {
+            Response loginResponse = UserAPI.loginUser(user);
+            return UserAPI.getAccessToken(loginResponse);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Step("Регистрация тестового пользователя через API: {user.name}")
     private void registerTestUserViaAPI(User user) {
-        Response response = UserAPI.createUser(user);
-        Response loginResponse = UserAPI.loginUser(user);
-        accessToken = UserAPI.getAccessToken(loginResponse);
+        UserAPI.createUser(user);
     }
 
     @Step("Выполнение входа со страницы")
@@ -95,17 +117,5 @@ public class LoginTest {
             passwordRecoveryPage.waitForPageLoad();
             passwordRecoveryPage.clickLoginLink();
         });
-    }
-
-    @After
-    public void tearDown() {
-
-        if (accessToken != null) {
-            UserAPI.deleteUser(accessToken);
-        }
-
-        if (driver != null) {
-            driver.quit();
-        }
     }
 }

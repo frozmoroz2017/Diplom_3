@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 public class RegistrationTest {
     private WebDriver driver;
     private User testUser;
-    private String accessToken;
 
     @Before
     public void setUp() {
@@ -26,14 +25,28 @@ public class RegistrationTest {
     }
 
     @After
+    @Step("Удаление тестового пользователя")
     public void tearDown() {
 
-        if (accessToken != null) {
-            UserAPI.deleteUser(accessToken);
+        if (testUser != null) {
+            String accessToken = getAccessTokenForDeletion(testUser);
+            if (accessToken != null) {
+                UserAPI.deleteUser(accessToken);
+            }
         }
 
         if (driver != null) {
             driver.quit();
+        }
+    }
+
+    @Step("Получение access token для удаления пользователя")
+    private String getAccessTokenForDeletion(User user) {
+        try {
+            Response loginResponse = UserAPI.loginUser(user);
+            return UserAPI.getAccessToken(loginResponse);
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -53,10 +66,6 @@ public class RegistrationTest {
 
         assertTrue("Должна открыться страница входа после успешной регистрации",
                 driver.getCurrentUrl().contains("login"));
-
-
-        Response loginResponse = UserAPI.loginUser(testUser);
-        accessToken = UserAPI.getAccessToken(loginResponse);
     }
 
     @Step("Регистрация пользователя: {user.name}")

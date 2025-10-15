@@ -13,6 +13,10 @@ public class User {
         this.password = password;
     }
 
+
+    public User() {
+    }
+
     public static User createRandomUser() {
         String name = "TestUser" + RandomStringUtils.randomNumeric(5);
         String email = "test" + RandomStringUtils.randomNumeric(5) + "@example.com";
@@ -34,7 +38,13 @@ public class User {
         return new User(name, email, password);
     }
 
+
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
+
+
+    public void setName(String name) { this.name = name; }
+    public void setEmail(String email) { this.email = email; }
+    public void setPassword(String password) { this.password = password; }
 }
